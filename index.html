@@ -7,6 +7,8 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Archivo+Black&display=swap" rel="stylesheet">
 <script>document.documentElement.classList.add('js');</script>
 <style>
@@ -2464,11 +2466,11 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
   });
 
   // Cross-page links (a project page's "../#work") land here with the hash
-  // already set, so the click handler above never sees them. Strip it straight
-  // away — waiting for 'load' meant waiting on every image, video and embed,
-  // which left the hash visible for seconds. Dropping it early also stops the
-  // browser re-scrolling as late content shifts the target, so take that over:
-  // settle once on 'load', but never if the reader is already scrolling.
+  // already set, so the click handler above never sees them. Clear it as soon
+  // as this script runs — but deliberately not any earlier. Stripping it up in
+  // the head would beat the browser's own scroll-to-fragment, leaving readers
+  // at the top of the page, and this layout uses scroll snapping, so scrolling
+  // there by hand instead is not a swap I can make without testing it live.
   (function () {
     const id = decodeURIComponent(location.hash.slice(1));
     if (!id) return;
