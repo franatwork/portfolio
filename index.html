@@ -1484,14 +1484,6 @@
     background: rgba(255,100,100,0.07);
     color: #ffd6d6;
   }
-  .contact-honeypot {
-    position: absolute !important;
-    left: -5000px !important;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-  }
-
   :focus-visible {
     outline: 2px solid rgba(255,255,255,0.9);
     outline-offset: 4px;
@@ -1806,10 +1798,15 @@
       accept-charset="UTF-8"
       data-basin-form
     >
-      <div class="contact-honeypot" aria-hidden="true">
-        <label for="company">Company (leave blank)</label>
-        <input id="company" type="text" name="company" tabindex="-1" autocomplete="off">
-      </div>
+      <!-- Basin's own honeypot convention. Replaces a text input named
+           "company" that sat off-screen at left:-5000px: browsers skip
+           display:none fields when autofilling but happily fill off-screen
+           ones, and "company" is exactly what Safari and password managers
+           target — autocomplete="off" is deliberately ignored on those. So it
+           was liable to be filled by real visitors while, being named
+           "company" rather than _gotcha, Basin never treated it as a trap in
+           the first place. type="hidden" is never autofilled. -->
+      <input type="hidden" name="_gotcha" tabindex="-1" autocomplete="off">
 
       <div class="contact-form-grid">
         <div class="contact-field">
