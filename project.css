@@ -1,0 +1,503 @@
+/* ══════════════════════════════════════════════════════════════════
+   Shared styles for all project pages (project.html + each project).
+   Edit here once and every project page updates.
+   ══════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white: #ffffff;
+  --black: #0a0a0a;
+  --fg-muted: rgba(255,255,255,0.45);
+  --fg-dim: rgba(255,255,255,0.2);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  width: 100%;
+  background: var(--black);
+  font-family: 'Instrument Sans', sans-serif;
+  color: var(--white);
+  overflow-x: hidden;
+}
+
+/* ── Full-page filmic grain (same layer as index) ── */
+.grain {
+  position: fixed;
+  inset: -20%;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.14;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='300'%20height='300'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.9'%20numOctaves='3'%20stitchTiles='stitch'/%3E%3CfeColorMatrix%20type='saturate'%20values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR%20type='gamma'%20amplitude='1'%20exponent='6'%20offset='0'/%3E%3CfeFuncG%20type='gamma'%20amplitude='1'%20exponent='6'%20offset='0'/%3E%3CfeFuncB%20type='gamma'%20amplitude='1'%20exponent='6'%20offset='0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+  background-repeat: repeat;
+  will-change: transform;
+  animation: grainShift 0.5s steps(1) infinite;
+}
+@keyframes grainShift {
+  0%    { transform: translate(0, 0); }
+  12.5% { transform: translate(-7%, -4%); }
+  25%   { transform: translate(-3%, 6%); }
+  37.5% { transform: translate(5%, -6%); }
+  50%   { transform: translate(-8%, 5%); }
+  62.5% { transform: translate(4%, 8%); }
+  75%   { transform: translate(-5%, -7%); }
+  87.5% { transform: translate(7%, 3%); }
+  100%  { transform: translate(0, 0); }
+}
+
+/* ── Nav ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 40px;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.85), transparent);
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0; /* let the title truncate instead of pushing the back pill out */
+}
+
+.logo-circle {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  padding: 5px;
+  transition: border-color 0.2s;
+}
+.logo-circle:hover { border-color: rgba(255,255,255,0.45); }
+.logo-circle img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  display: block;
+  /* Optical centering of the top-heavy mark. Percentage resolves against the
+     image's own height, so the nudge scales with the circle (44px desktop /
+     40px mobile) instead of over-correcting at the smaller size. */
+  transform: translateY(9.4%);
+}
+
+.nav-page-title {
+  font-size: clamp(22px, 3vw, 38px);
+  font-weight: 700;
+  font-family: 'Archivo Black', sans-serif;
+  color: var(--white);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Glass pill — nav back link and general pill links (.btn-pill) */
+.btn-pill,
+.btn-back {
+  flex-shrink: 0; /* navigation must never be squeezed out by a long title */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-bottom-color: rgba(255,255,255,0.06);
+  background: linear-gradient(160deg, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0.04) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.2),
+    0 4px 16px rgba(0,0,0,0.35);
+  color: var(--white);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  backdrop-filter: blur(28px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(28px) saturate(180%) brightness(1.1);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.btn-pill:hover,
+.btn-back:hover {
+  background: linear-gradient(160deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%);
+  border-color: rgba(255,255,255,0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.32),
+    inset 0 -1px 0 rgba(0,0,0,0.15),
+    0 6px 24px rgba(0,0,0,0.45);
+}
+.btn-pill svg,
+.btn-back svg { display: block; }
+
+/* ── Page shell ── */
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 max(24px, 6vw);
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-bottom: 24px;
+}
+
+.section-body {
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.55);
+  max-width: 640px;
+}
+.section-body + .section-body { margin-top: 18px; }
+
+/* ── Hero ── */
+.project-hero {
+  padding-top: clamp(140px, 22vh, 210px);
+  padding-bottom: 56px;
+}
+.project-title {
+  font-family: 'Archivo Black', sans-serif;
+  /* floor is low enough that a long single word (e.g. "Lunchbreak") still
+     fits a 320px screen; above ~425px this is unchanged at 8vw */
+  font-size: clamp(34px, 8vw, 104px);
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+  text-transform: uppercase;
+  overflow-wrap: break-word; /* safety net for any future longer name */
+  margin-bottom: 28px;
+  opacity: 0;
+  animation: heroReveal 0.68s 0.12s var(--ease-out) forwards;
+}
+.project-intro {
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.7;
+  color: rgba(255,255,255,0.6);
+  max-width: 660px;
+  opacity: 0;
+  animation: heroReveal 0.58s 0.26s var(--ease-out) forwards;
+}
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* Meta strip */
+.project-meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  opacity: 0;
+  animation: heroReveal 0.58s 0.38s var(--ease-out) forwards;
+}
+.project-meta div { min-width: 0; }
+.project-meta dt {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-bottom: 8px;
+}
+.project-meta dd {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+}
+
+/* ── Media ── */
+.media { margin: 0; }
+.media-frame {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  background-color: #0d0d0d;
+  /* offset dot rows echo the landing matrix (visible on empty placeholders) */
+  background-image:
+    radial-gradient(rgba(255,255,255,0.065) 1.1px, transparent 1.7px),
+    radial-gradient(rgba(255,255,255,0.045) 1.1px, transparent 1.7px);
+  background-size: 14px 14px, 14px 14px;
+  background-position: 0 0, 7px 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.35s ease;
+}
+.media-frame:hover { border-color: rgba(255,255,255,0.18); }
+
+/* Default: the frame hugs the media at its true proportions (no cropping) */
+.media-frame img,
+.media-frame video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Fixed-ratio frames — for placeholders, or a deliberate uniform crop */
+.ratio-16-9 { aspect-ratio: 16 / 9; }
+.ratio-21-9 { aspect-ratio: 21 / 9; }
+.ratio-4-3  { aspect-ratio: 4 / 3; }
+.ratio-16-9 img, .ratio-16-9 video,
+.ratio-21-9 img, .ratio-21-9 video,
+.ratio-4-3 img,  .ratio-4-3 video {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+/* Interactive embeds (e.g. a Figma prototype). Set the aspect ratio to match
+   the prototype's frame size, e.g. style="--embed-ratio: 390 / 844" */
+.media-frame.is-embed {
+  aspect-ratio: var(--embed-ratio, 16 / 9);
+  cursor: default;        /* not a lightbox target */
+  background-image: none; /* the embed paints its own surface */
+}
+.media-frame.is-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  border: 0;
+  display: block;
+}
+/* On narrow screens a landscape embed shrinks a phone prototype to a stamp —
+   pages can provide a portrait ratio to use instead */
+@media (max-width: 900px) {
+  .media-frame.is-embed {
+    aspect-ratio: var(--embed-ratio-mobile, var(--embed-ratio, 16 / 9));
+  }
+}
+
+.media-note {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  text-align: center;
+  padding: 12px;
+}
+.media-caption {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+}
+
+/* ── Content sections ── */
+.project-section {
+  padding: 72px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.project-section.no-rule { border-top: none; }
+
+.section-heading-sm {
+  font-size: clamp(28px, 3.6vw, 44px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.08;
+  margin-bottom: 24px;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr);
+  gap: clamp(28px, 5vw, 80px);
+  align-items: start;
+}
+.two-col .section-heading-sm { margin-bottom: 0; }
+
+/* Gallery */
+.gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px 16px;
+  align-items: start;
+}
+.gallery .span-2 { grid-column: 1 / -1; }
+
+/* ── Footer: next project + back to top ── */
+.project-footer {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  margin-top: 24px;
+  padding: 72px 0 96px;
+  text-align: center;
+  position: relative;
+}
+.next-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  margin-bottom: 18px;
+}
+.next-project {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  text-decoration: none;
+  color: var(--white);
+  font-family: 'Archivo Black', sans-serif;
+  font-size: clamp(30px, 5vw, 60px);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.next-project svg {
+  flex-shrink: 0;
+  color: rgba(255,255,255,0.35);
+  transition: color 0.2s, translate 0.3s var(--ease-out);
+  translate: 0 0;
+}
+.next-project:hover svg {
+  color: rgba(255,255,255,0.9);
+  translate: 8px 0;
+}
+
+/* Ghost back-to-top chevron — same language as the index back-to-top */
+.back-top {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  translate: -50% 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; height: 40px;
+  border-radius: 999px;
+  color: rgba(255,255,255,0.35);
+  transition: color 0.2s, background 0.2s, transform 0.2s;
+}
+.back-top:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.06); }
+.back-top:active { transform: scale(0.94); }
+.back-top:focus-visible {
+  outline: 1px solid rgba(255,255,255,0.4);
+  outline-offset: 2px;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ── Lightbox — click an image to view it near-fullscreen ── */
+.media-frame:has(img) { cursor: zoom-in; }
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 500; /* above nav, below the grain film */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(24px, 4vh) max(24px, 4vw);
+  background: rgba(5,5,5,0.88);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  cursor: zoom-out;
+}
+.lightbox.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.lightbox-img {
+  max-width: min(94vw, 1600px);
+  max-height: 92vh;
+  width: auto; height: auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+  scale: 0.96;
+  transition: scale 0.35s var(--ease-out);
+}
+.lightbox.open .lightbox-img { scale: 1; }
+.lightbox-close {
+  position: absolute;
+  top: 20px; right: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, transform 0.2s;
+}
+.lightbox-close:hover { color: rgba(255,255,255,0.95); background: rgba(255,255,255,0.08); }
+.lightbox-close:active { transform: scale(0.94); }
+.lightbox-close:focus-visible {
+  outline: 1px solid rgba(255,255,255,0.4);
+  outline-offset: 2px;
+  color: rgba(255,255,255,0.95);
+}
+
+/* ── Scroll reveal (same pattern as index) ── */
+.reveal-item { opacity: 1; translate: 0 0; }
+.js .reveal-item {
+  opacity: 0;
+  translate: 0 28px;
+  transition: opacity 0.72s var(--ease-out), translate 0.72s var(--ease-out);
+  transition-delay: var(--reveal-delay, 0.06s);
+}
+.js .reveal-item.in-view {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  nav { padding: 16px 20px; }
+  .logo-circle { width: 40px; height: 40px; }
+  .nav-page-title { font-size: 20px; }
+  .btn-back { padding: 10px 14px; font-size: 11px; }
+  .project-meta { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+  .gallery { grid-template-columns: 1fr; }
+  .gallery .span-2 { grid-column: auto; }
+  .project-section { padding: 56px 0; }
+  /* comfortable thumb targets (44px is the accessibility floor) */
+  .back-top, .lightbox-close { width: 44px; height: 44px; }
+  .btn-back, .btn-pill { min-height: 44px; }
+  .next-project { padding: 8px 0; }
+}
+
+/* Below this the page title would crowd out the back button — the hero H1
+   right underneath already names the project, so drop it. */
+@media (max-width: 560px) {
+  .nav-page-title { display: none; }
+  .nav-left { gap: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain { animation: none; }
+  .project-title, .project-intro, .project-meta { animation-duration: 0s, 0s; animation-delay: 0s; }
+  .js .reveal-item { transition: none; opacity: 1; translate: 0 0; }
+  .lightbox, .lightbox-img { transition: none; }
+  html { scroll-behavior: auto; }
+}

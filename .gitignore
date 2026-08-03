@@ -1,0 +1,27 @@
+# Site archive — 23MB, not needed to serve the site
+portfolio-v5-site.zip
+
+# Bluehost / cPanel artifacts
+.ftpquota
+.htaccess.nfd-backup
+.htaccess.phpupgrader.*
+
+# SSL + Cloudflare validation tokens (one-time, already consumed)
+.well-known/
+
+# macOS
+.DS_Store
+
+# --- Legacy files from the OLD portfolio (fmgpires/Portfolio) ---
+# These sit on disk but must never be published. sendmail.php needs a PHP
+# server that GitHub Pages doesn't have, and deploy.yml SSHes into Bluehost
+# and hard-resets public_html, which would wipe the live site.
+# Safe to delete from disk yourself; they're preserved in that repo's history.
+about.html
+contact.html
+projects.html
+styles.css
+photo.jpeg
+pfpico.png
+sendmail.php
+.github/workflows/deploy.yml
