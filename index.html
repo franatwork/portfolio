@@ -1919,6 +1919,26 @@ function hexToRgb(h) {
 
 const paletteRgb = palette.map(hexToRgb);
 
+// The same six stops the top and bottom glows use, so the hero, the wash
+// behind the contact form and the signature banner all sweep alike.
+const SIGNATURE_STOPS = [
+  [150, 42, 112], [168, 55, 160], [140, 68, 205],
+  [105, 78, 232], [66, 98, 246], [42, 118, 255]
+];
+// How far each dot moves from its grey toward the sweep. The grid is meant to
+// read as texture, not as a second gradient competing with the glows, so this
+// stays well short of full saturation.
+const SIGNATURE_TINT = 0.62;
+
+function signatureAt(u) {
+  const s = Math.max(0, Math.min(1, u)) * (SIGNATURE_STOPS.length - 1);
+  const i = Math.floor(s);
+  const f = s - i;
+  const a = SIGNATURE_STOPS[i];
+  const b = SIGNATURE_STOPS[Math.min(i + 1, SIGNATURE_STOPS.length - 1)];
+  return [lerp(a[0], b[0], f), lerp(a[1], b[1], f), lerp(a[2], b[2], f)];
+}
+
 function drawDot(x, y, r, depth, alpha, targetCtx) {
   if (r < 0.4) return;
   const tc = targetCtx || ctx;
@@ -1927,12 +1947,30 @@ function drawDot(x, y, r, depth, alpha, targetCtx) {
   const t2 = (d * (palette.length - 1)) - colorIdx;
   const [r1, g1, b1] = paletteRgb[colorIdx];
   const [r2, g2, b2] = paletteRgb[Math.min(colorIdx + 1, paletteRgb.length - 1)];
-  const rr = Math.round(lerp(r1, r2, t2));
-  const gg = Math.round(lerp(g1, g2, t2));
-  const bb = Math.round(lerp(b1, b2, t2));
+  let rr = lerp(r1, r2, t2);
+  let gg = lerp(g1, g2, t2);
+  let bb = lerp(b1, b2, t2);
+  // Tint by horizontal position. The signature colour is renormalised to the
+  // grey's own luminance first: scaling it by luminance directly (the obvious
+  // move) yields a *darker* colour rather than an equally bright one, so the
+  // dot loses brightness and barely gains hue. Matching luminance means this
+  // shifts colour only, and the wave's depth shading survives untouched.
+  // Both canvases span the same width, so the sweep stays continuous across
+  // the seam into the section below.
+  if (W > 0) {
+    const [tr, tg, tb] = signatureAt(x / W);
+    const lum = rr + gg + bb;
+    const tintLum = tr + tg + tb;
+    if (tintLum > 0) {
+      const k = lum / tintLum;
+      rr = lerp(rr, tr * k, SIGNATURE_TINT);
+      gg = lerp(gg, tg * k, SIGNATURE_TINT);
+      bb = lerp(bb, tb * k, SIGNATURE_TINT);
+    }
+  }
   tc.beginPath();
   tc.arc(x, y, r, 0, Math.PI * 2);
-  tc.fillStyle = `rgba(${rr},${gg},${bb},${alpha.toFixed(3)})`;
+  tc.fillStyle = `rgba(${Math.round(rr)},${Math.round(gg)},${Math.round(bb)},${alpha.toFixed(3)})`;
   tc.fill();
 }
 
@@ -2245,16 +2283,18 @@ function draw(timestamp) {
   ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, 0, W, H);
-  // 0.36 x 0.82 — the canvases moved to full opacity so the solid mark could
-  // reach true white, so the ambient alpha absorbs the 0.82 they used to carry
-  // and the background renders exactly as before.
-  renderAmbient(ctx, 0, 0, H, t, nowMs, 0.295);
+  // 4x the luminance-compensated 0.295 the grid used to sit at. Deliberate:
+  // the dots now carry the signature sweep, and hue cannot register a few
+  // steps above black — at the old value the tint measured 3/255 and was
+  // invisible. Brightening it is what makes the gradient exist at all, and it
+  // does turn the grid from background texture into a visible element.
+  renderAmbient(ctx, 0, 0, H, t, nowMs, 1.18);
 
   // ── 1b. Spillover: continue the exact same matrix past the landing seam,
   //        drawn on a transparent canvas at the top of the next section. ──
   if (spillCtx) {
     spillCtx.clearRect(0, 0, W, SPILL_H);
-    renderAmbient(spillCtx, H, H, H + SPILL_H, t, nowMs, 0.295);
+    renderAmbient(spillCtx, H, H, H + SPILL_H, t, nowMs, 1.18);
   }
 
   // ── 2. Solid mark ──
