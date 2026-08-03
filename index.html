@@ -2457,6 +2457,15 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       history.replaceState(null, '', location.pathname + location.search);
     });
   });
+
+  // Cross-page links (a project page's "index.html#work") land here with the
+  // hash already in the URL, so the click handler above never sees them. Let
+  // the browser do its own scrolling — it re-adjusts as images load — and only
+  // tidy the URL on 'load', once nothing is left to shift.
+  window.addEventListener('load', () => {
+    if (!location.hash) return;
+    history.replaceState(null, '', location.pathname + location.search);
+  });
 })();
 </script>
 </body>

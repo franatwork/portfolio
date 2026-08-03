@@ -75,4 +75,11 @@
       history.replaceState(null, '', location.pathname + location.search);
     });
   });
+
+  // Same for arriving with a hash already set (a shared deep link). Let the
+  // browser scroll, then tidy the URL once nothing is left to shift.
+  window.addEventListener('load', () => {
+    if (!location.hash) return;
+    history.replaceState(null, '', location.pathname + location.search);
+  });
 })();
