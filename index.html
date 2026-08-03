@@ -177,7 +177,87 @@
     background: radial-gradient(ellipse at 50% 62%, rgba(42,118,255,0.32)  0%, rgba(42,118,255,0)  70%);
   }
   @media (prefers-reduced-motion: reduce) {
+    .section-chevron svg { animation: none; }
     .bottom-glow span { animation: none; }
+    .top-glow span { animation: none; }
+  }
+
+  /* ── Mobile hero top wash ──
+     The mirror of .bottom-glow: same signature palette, same drifting blooms,
+     flipped so the light spills down from the top edge instead of up from the
+     bottom. Mobile only — the desktop hero keeps its halftone canvas, which is
+     switched off on small screens because the ripple interaction it exists for
+     is pointer-only and never fires on touch. Reuses the glowPulse keyframes
+     already defined above; only the drift needed a downward variant. */
+  .top-glow {
+    display: none;
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: min(56vh, 440px);
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    isolation: isolate;
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 18%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 18%, transparent 100%);
+  }
+  @media (max-width: 900px) {
+    .top-glow { display: block; }
+  }
+  .top-glow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(95deg,
+      rgba(150,42,112,0.34)  0%,
+      rgba(168,55,160,0.32) 21%,
+      rgba(140,68,205,0.26)  39%,
+      rgba(105,78,232,0.30) 58%,
+      rgba(66,98,246,0.30)   77%,
+      rgba(42,118,255,0.26) 100%);
+  }
+  .top-glow span {
+    position: absolute;
+    top: -30%;
+    width: clamp(420px, 88vw, 900px);
+    height: clamp(240px, 40vh, 460px);
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+    animation:
+      topGlowDrift var(--dur) ease-in-out var(--delay) infinite,
+      glowPulse calc(var(--dur) * 0.55) ease-in-out var(--delay) infinite alternate;
+  }
+  @keyframes topGlowDrift {
+    0%   { transform: translate3d(0, 0, 0) scale(1); }
+    25%  { transform: translate3d(var(--dx), var(--dy), 0) scale(var(--s1)); }
+    50%  { transform: translate3d(calc(var(--dx) * -0.55), calc(var(--dy) * 1.5), 0) scale(var(--s2)); }
+    75%  { transform: translate3d(calc(var(--dx) * -1), calc(var(--dy) * 0.35), 0) scale(var(--s1)); }
+    100% { transform: translate3d(0, 0, 0) scale(1); }
+  }
+  .top-glow span:nth-child(1) {
+    left: -28%; --dur: 13s; --delay:  -2s; --dx:  11vw; --dy:  6vh; --s1: 1.18; --s2: 0.90;
+    background: radial-gradient(ellipse at 50% 38%, rgba(150,42,112,0.46) 0%, rgba(150,42,112,0) 70%);
+  }
+  .top-glow span:nth-child(2) {
+    left: -8%;  --dur: 17s; --delay:  -7s; --dx: -10vw; --dy:  8vh; --s1: 1.22; --s2: 0.88;
+    background: radial-gradient(ellipse at 50% 38%, rgba(168,55,160,0.44) 0%, rgba(168,55,160,0) 70%);
+  }
+  .top-glow span:nth-child(3) {
+    left: 14%;  --dur: 15s; --delay: -11s; --dx:  13vw; --dy:  5vh; --s1: 1.15; --s2: 0.93;
+    background: radial-gradient(ellipse at 50% 38%, rgba(140,68,205,0.38) 0%, rgba(140,68,205,0) 70%);
+  }
+  .top-glow span:nth-child(4) {
+    left: 38%;  --dur: 19s; --delay:  -4s; --dx: -12vw; --dy:  7vh; --s1: 1.20; --s2: 0.89;
+    background: radial-gradient(ellipse at 50% 38%, rgba(105,78,232,0.42) 0%, rgba(105,78,232,0) 70%);
+  }
+  .top-glow span:nth-child(5) {
+    left: 60%;  --dur: 14s; --delay: -13s; --dx:  10vw; --dy:  9vh; --s1: 1.17; --s2: 0.91;
+    background: radial-gradient(ellipse at 50% 38%, rgba(66,98,246,0.42)  0%, rgba(66,98,246,0)  70%);
+  }
+  .top-glow span:nth-child(6) {
+    left: 80%;  --dur: 16s; --delay:  -9s; --dx: -11vw; --dy:  6vh; --s1: 1.19; --s2: 0.90;
+    background: radial-gradient(ellipse at 50% 38%, rgba(42,118,255,0.36) 0%, rgba(42,118,255,0) 70%);
   }
 
   /* ── Nav (hidden on landing, shown from about onward) ── */
@@ -369,6 +449,47 @@
     background: rgba(255,255,255,0.06);
   }
   .back-to-top:active { transform: scale(0.94); }
+
+  /* Section-to-section chevron — the same ghost circle as the two controls
+     above, so it reads as part of the set rather than a new kind of button.
+     Mobile only: on desktop the nav pills already do this, and the sections
+     are one viewport tall there anyway. Pinned to the bottom of its own
+     section rather than the viewport, so on the taller sections (about, work)
+     it appears exactly when you reach the end of the content — which is when
+     you'd want it — instead of hovering over text you're still reading. */
+  .section-chevron {
+    display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+    translate: -50% 0;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    border-radius: 999px;
+    color: rgba(255,255,255,0.35);
+    z-index: 3;
+    transition: color 0.2s, background 0.2s;
+  }
+  .section-chevron:active {
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.06);
+  }
+  .section-chevron:focus-visible {
+    outline: 1px solid rgba(255,255,255,0.4);
+    outline-offset: 2px;
+    color: rgba(255,255,255,0.9);
+  }
+  @media (max-width: 900px) {
+    .section-chevron { display: inline-flex; }
+  }
+  /* A slow nudge rather than a bounce — enough to read as "there's more below"
+     without competing with the content above it. */
+  .section-chevron svg { animation: chevronNudge 2.6s ease-in-out infinite; }
+  @keyframes chevronNudge {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(3px); }
+  }
   .back-to-top:focus-visible {
     outline: 1px solid rgba(255,255,255,0.4);
     outline-offset: 2px;
@@ -402,6 +523,18 @@
     text-align: right;
     position: relative;
     z-index: 1;
+  }
+
+  /* The F mark, shown only on mobile. On desktop the halftone canvas draws it
+     into the background; with that canvas off on small screens it has to be a
+     real element, so the hero can compose it with the title as one group
+     instead of the two sitting at opposite ends of the screen. */
+  .hero-mark {
+    display: none;
+    width: clamp(112px, 34vw, 168px);
+    height: auto;
+    margin-bottom: clamp(24px, 5vh, 40px);
+    opacity: 0.96;
   }
 
   .hero-title {
@@ -1267,6 +1400,15 @@
   @media (max-width: 900px) {
     html { scroll-snap-type: y proximity; }
     nav { padding: 16px 18px; }
+    /* Body copy scrolls under the nav and the bar itself is transparent, so
+       text showed through the gaps between the pills. Scoped to .visible so
+       nothing paints over the landing, where the nav is still hidden. */
+    nav.visible {
+      background: rgba(10,10,10,0.66);
+      backdrop-filter: blur(14px) saturate(130%);
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
     .nav-page-title { display: none; }
     .logo-circle { width: 40px; height: 40px; }
     .nav-links { gap: 5px; }
@@ -1279,12 +1421,27 @@
       align-items: center;
     }
     .nav-toggle, .back-to-top { width: 44px; height: 44px; }
+    /* Purpose-built mobile hero: mark, title and nothing else, centred as one
+       group. The old rule pinned this to flex-end while the canvas drew the
+       mark up at the top, leaving ~400px of dead space between them. */
     .hero {
       align-items: center;
-      justify-content: flex-end;
-      padding: 100px 6% clamp(112px, 18vh, 160px);
+      justify-content: center;
+      /* Asymmetric on purpose. Geometric centring measures out even (275px
+         above, 273px below) but reads top-heavy, because the gradient puts
+         real visual mass in the upper third and the lower half is empty.
+         Extra top padding drops the group just under true centre to
+         counterweight it. */
+      padding: clamp(140px, 22vh, 200px) 6% clamp(88px, 14vh, 120px);
       text-align: center;
     }
+    .hero-mark { display: block; }
+    /* The canvas exists for a pointer ripple that never fires on touch, so on
+       mobile it is pure cost — the top wash replaces it. */
+    #landing #bg { display: none; }
+    /* The chevron at the bottom of the section is the scroll cue now, so the
+       Enter pill would be a second control saying the same thing. */
+    .hero-cta { display: none; }
     .inner-section { padding: 104px 7% 72px; }
     #about {
       flex-direction: column !important;
@@ -1390,7 +1547,11 @@
 <!-- ── LANDING ── -->
 <section class="section" id="landing">
   <canvas id="bg"></canvas>
+  <div class="top-glow" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
   <div class="hero">
+    <img class="hero-mark" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA3NzguNjMgNDk0LjA4Ij4KICA8ZGVmcz4KICAgIDxzdHlsZT4KICAgICAgLmNscy0xIHsKICAgICAgICBmaWxsOiAjZmZmOwogICAgICB9CiAgICA8L3N0eWxlPgogIDwvZGVmcz4KICA8ZyBpZD0iTGF5ZXJfMi0yIiBkYXRhLW5hbWU9IkxheWVyIDIiPgogICAgPHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMTQ2Ljg3LDI1NS45M0wwLDBoNzc4LjYzbC00Mi42LDc0LjI2Yy0xNy41MiwzMC41NS01MC4wNSw0OS4zOC04NS4yNiw0OS4zOGgtMjQ1Ljc1bC0xOC4wNyw1Ni41M2gxNzAuNTlsLTE5LjE4LDUyLjc0Yy0xNC4xMywzOC44NS01MS4wNCw2NC43MS05Mi4zOCw2NC43MWgtOTcuMTFsLTYzLjY2LDE5Ni40NS03Mi41NC0xMjUuNjcsNzkuNC0yNDQuNzZoLTQ4LjU5Yy0zMi4wNiwwLTYwLjQ2LDIwLjY2LTcwLjM0LDUxLjE1bC0yNi4yOCw4MS4xM1oiLz4KICA8L2c+Cjwvc3ZnPg==" alt="" aria-hidden="true">
     <h1 class="hero-title">
       <span class="greeting">Fran's</span>
       <span class="name">Portfolio</span>
@@ -1399,6 +1560,11 @@
       <a href="#about" class="btn-enter">Enter</a>
     </div>
   </div>
+  <a class="section-chevron" href="#about" aria-label="Scroll to about">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="4 5.5 8 10.5 12 5.5"></polyline>
+    </svg>
+  </a>
 </section>
 
 <!-- ── ABOUT ── -->
@@ -1425,6 +1591,11 @@
       </div>
     </div>
   </div>
+  <a class="section-chevron" href="#work" aria-label="Scroll to work">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="4 5.5 8 10.5 12 5.5"></polyline>
+    </svg>
+  </a>
 </section>
 
 <!-- ── WORK: BRANDING ── -->
@@ -1449,6 +1620,11 @@
       </div>
     </div>
   </div>
+  <a class="section-chevron" href="#project-lead" aria-label="Scroll to more work">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="4 5.5 8 10.5 12 5.5"></polyline>
+    </svg>
+  </a>
 </section>
 
 <!-- ── WORK: PROJECT LEAD ── -->
@@ -1460,6 +1636,11 @@
       <div class="card-hover-overlay"><span class="card-hover-title">Oriente Green Campus</span></div>
     </div>
   </div>
+  <a class="section-chevron" href="#bento" aria-label="Scroll to more">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="4 5.5 8 10.5 12 5.5"></polyline>
+    </svg>
+  </a>
 </section>
 
 
@@ -1472,6 +1653,11 @@
       <h2 class="glitch-text" data-text="AND MUCH MORE">And much more</h2>
     </div>
   </div>
+  <a class="section-chevron" href="#contact" aria-label="Scroll to contact">
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="4 5.5 8 10.5 12 5.5"></polyline>
+    </svg>
+  </a>
 </section>
 
 <!-- ── CONTACT ── -->
