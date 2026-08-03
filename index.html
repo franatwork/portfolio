@@ -586,10 +586,11 @@
   @media (max-width: 900px) {
     .section-chevron { display: inline-flex; }
     /* Clear of the browser's bottom toolbar, same reasoning as .back-to-top. */
-    .section-chevron { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
-    /* The last section needs real room under it, or the final content sits
-       flush against the browser chrome when the toolbar animates back in. */
-    #contact { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+    .section-chevron { bottom: calc(32px + env(safe-area-inset-bottom, 0px)); }
+    /* #contact's bottom padding is set further down, next to the other mobile
+       #contact rule — a base #contact rule later in this stylesheet carries
+       the same specificity, so anything set here loses on source order. */
+    .back-to-top { bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
   }
   /* A slow nudge rather than a bounce — enough to read as "there's more below"
      without competing with the content above it. */
@@ -1565,7 +1566,18 @@
     .work-col-left { display: grid; grid-template-columns: 1fr 1fr; }
     .work-card { min-height: 250px; }
     .work-card-tall { min-height: 360px; }
-    #contact { padding-top: 104px; }
+    /* Mobile browser toolbars overlay the layout viewport and are NOT reported
+       by env(safe-area-inset-bottom) — that covers the notch and home indicator
+       only, and reads 0px in ordinary Safari. So the clearance has to be a real
+       number, sized for a toolbar (~50px) plus room to breathe. env() stays on
+       top for devices that do have a home indicator.
+       This has to live here rather than with the other mobile rules above: the
+       base #contact rule sets padding-bottom too, at equal specificity, and it
+       appears later in the stylesheet — so it wins anywhere earlier than this. */
+    #contact {
+      padding-top: 104px;
+      padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+    }
   }
 
   /* Reclaim horizontal room so the pills still fit beside the logo+toggle */
