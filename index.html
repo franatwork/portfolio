@@ -2267,9 +2267,14 @@ function draw(timestamp) {
       const x = col * lg + offset + lHalf;
       const y = row * lg + lHalf;
       const { r, depth, alpha } = wave(x, y, t, nowMs);
-      const baseR = lg * 0.32;
+      // The dots were already near-white (peaking ~245); what made the mark
+      // read grey was coverage — at 0.32 the discs filled about a third of
+      // each cell and the dark background showed through the gaps. Fatter
+      // discs raise the average without touching the halftone character,
+      // and this block only draws the logo, so the ambient grid is unchanged.
+      const baseR = lg * 0.45;
       const rippleR = Math.max(0.5, baseR + (r - gridSize * 0.03) * 0.3);
-      const rippleAlpha = Math.min(0.95, 0.78 + (alpha - 0.28) * 0.8);
+      const rippleAlpha = Math.min(1, 0.9 + (alpha - 0.28) * 0.8);
       logoOffscreenCtx.beginPath();
       logoOffscreenCtx.arc(x, y, rippleR, 0, Math.PI * 2);
       logoOffscreenCtx.fillStyle = `rgba(255,255,255,${rippleAlpha.toFixed(3)})`;
