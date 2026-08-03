@@ -2463,14 +2463,27 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     });
   });
 
-  // Cross-page links (a project page's "index.html#work") land here with the
-  // hash already in the URL, so the click handler above never sees them. Let
-  // the browser do its own scrolling — it re-adjusts as images load — and only
-  // tidy the URL on 'load', once nothing is left to shift.
-  window.addEventListener('load', () => {
-    if (!location.hash) return;
+  // Cross-page links (a project page's "../#work") land here with the hash
+  // already set, so the click handler above never sees them. Strip it straight
+  // away — waiting for 'load' meant waiting on every image, video and embed,
+  // which left the hash visible for seconds. Dropping it early also stops the
+  // browser re-scrolling as late content shifts the target, so take that over:
+  // settle once on 'load', but never if the reader is already scrolling.
+  (function () {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const target = document.getElementById(id);
     history.replaceState(null, '', location.pathname + location.search);
-  });
+    if (!target) return;
+    let touched = false;
+    const mark = () => { touched = true; };
+    ['wheel', 'touchstart', 'keydown'].forEach(ev => {
+      window.addEventListener(ev, mark, { passive: true, once: true });
+    });
+    window.addEventListener('load', () => {
+      if (!touched) target.scrollIntoView({ behavior: 'auto' });
+    }, { once: true });
+  })();
 })();
 </script>
 </body>

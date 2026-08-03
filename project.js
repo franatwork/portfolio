@@ -81,10 +81,23 @@
     });
   });
 
-  // Same for arriving with a hash already set (a shared deep link). Let the
-  // browser scroll, then tidy the URL once nothing is left to shift.
-  window.addEventListener('load', () => {
-    if (!location.hash) return;
+  // Same for arriving with a hash already set (a shared deep link). Strip it
+  // straight away rather than on 'load' — the images here are large, and
+  // waiting left the hash sitting in the address bar. Re-settle once loading
+  // finishes, unless the reader has already started scrolling.
+  (function () {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const target = document.getElementById(id);
     history.replaceState(null, '', location.pathname + location.search);
-  });
+    if (!target) return;
+    let touched = false;
+    const mark = () => { touched = true; };
+    ['wheel', 'touchstart', 'keydown'].forEach(ev => {
+      window.addEventListener(ev, mark, { passive: true, once: true });
+    });
+    window.addEventListener('load', () => {
+      if (!touched) target.scrollIntoView({ behavior: 'auto' });
+    }, { once: true });
+  })();
 })();
