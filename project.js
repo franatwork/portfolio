@@ -68,7 +68,12 @@
   // stays smooth normally and jumps under prefers-reduced-motion.
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
-      const target = document.getElementById(a.getAttribute('href').slice(1));
+      const id = decodeURIComponent(a.getAttribute('href').slice(1));
+      // "#top" and bare "#" are spec-defined shortcuts for the document top —
+      // there is no element with that id, so getElementById alone returns null
+      // and the link would fall through and leave the hash in the URL.
+      const target = document.getElementById(id) ||
+        ((id === 'top' || id === '') ? document.documentElement : null);
       if (!target) return;
       e.preventDefault();
       target.scrollIntoView();
