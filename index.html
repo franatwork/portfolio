@@ -58,7 +58,11 @@
     inset: 0;
     width: 100%; height: 100%;
     z-index: 0;
-    opacity: 0.82;
+    /* Full opacity so the solid mark drawn into this canvas lands on a true
+       255 and matches the wordmark. The ambient dots would have brightened
+       by the same 22%, so their alpha multiplier is scaled by the old 0.82
+       at the draw call to keep the background exactly as it was. */
+    opacity: 1;
   }
 
   /* ── Full-page filmic grain ── */
@@ -746,7 +750,9 @@
     width: 100%;
     height: 220px;
     z-index: 3;
-    opacity: 0.82;
+    /* Matches #bg — these two have to stay identical or the seam between the
+       landing and the section below it becomes visible. */
+    opacity: 1;
     pointer-events: none;
     -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 10%, transparent 80%);
     mask-image: linear-gradient(to bottom, #000 0%, #000 10%, transparent 80%);
@@ -2239,54 +2245,28 @@ function draw(timestamp) {
   ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = '#0a0a0a';
   ctx.fillRect(0, 0, W, H);
-  renderAmbient(ctx, 0, 0, H, t, nowMs, 0.36);
+  // 0.36 x 0.82 — the canvases moved to full opacity so the solid mark could
+  // reach true white, so the ambient alpha absorbs the 0.82 they used to carry
+  // and the background renders exactly as before.
+  renderAmbient(ctx, 0, 0, H, t, nowMs, 0.295);
 
   // ── 1b. Spillover: continue the exact same matrix past the landing seam,
   //        drawn on a transparent canvas at the top of the next section. ──
   if (spillCtx) {
     spillCtx.clearRect(0, 0, W, SPILL_H);
-    renderAmbient(spillCtx, H, H, H + SPILL_H, t, nowMs, 0.36);
+    renderAmbient(spillCtx, H, H, H + SPILL_H, t, nowMs, 0.295);
   }
 
-  // ── 2. Fine white grid — only within logo bounding box ──
-  logoOffscreenCtx.clearRect(0, 0, W, H);
-  const lg = logoGrid;
-  const lHalf = lg / 2;
-  // Clamp iteration to logo bounding rect + small padding
-  const bx0 = Math.max(0, logoScreenX - lg);
-  const by0 = Math.max(0, logoScreenY - lg);
-  const bx1 = Math.min(W, logoScreenX + logoScreenW + lg);
-  const by1 = Math.min(H, logoScreenY + logoScreenH + lg);
-  const colStart = Math.floor(bx0 / lg);
-  const colEnd   = Math.ceil(bx1 / lg) + 1;
-  const rowStart = Math.floor(by0 / lg);
-  const rowEnd   = Math.ceil(by1 / lg) + 1;
-  for (let row = rowStart; row < rowEnd; row++) {
-    for (let col = colStart; col < colEnd; col++) {
-      const offset = (row % 2) * (lg / 2);
-      const x = col * lg + offset + lHalf;
-      const y = row * lg + lHalf;
-      const { r, depth, alpha } = wave(x, y, t, nowMs);
-      // The dots were already near-white (peaking ~245); what made the mark
-      // read grey was coverage — at 0.32 the discs filled about a third of
-      // each cell and the dark background showed through the gaps. Fatter
-      // discs raise the average without touching the halftone character,
-      // and this block only draws the logo, so the ambient grid is unchanged.
-      const baseR = lg * 0.45;
-      const rippleR = Math.max(0.5, baseR + (r - gridSize * 0.03) * 0.3);
-      const rippleAlpha = Math.min(1, 0.9 + (alpha - 0.28) * 0.8);
-      logoOffscreenCtx.beginPath();
-      logoOffscreenCtx.arc(x, y, rippleR, 0, Math.PI * 2);
-      logoOffscreenCtx.fillStyle = `rgba(255,255,255,${rippleAlpha.toFixed(3)})`;
-      logoOffscreenCtx.fill();
-    }
-  }
-
-  // ── 3. Clip offscreen canvas to logo path, composite onto main ──
+  // ── 2. Solid mark ──
+  // The halftone is background only now; the mark is filled flat white so it
+  // matches the wordmark exactly. A halftone can never do that — its apparent
+  // brightness is coverage x dot alpha, so the gaps always average it down,
+  // and closing them far enough to reach white just makes it solid anyway.
+  // This also drops a per-frame offscreen render of the whole logo box.
   if (!cachedLogoPath) cachedLogoPath = buildLogoPath2D();
   ctx.save();
-  ctx.clip(cachedLogoPath);
-  ctx.drawImage(logoOffscreenCanvas, 0, 0);
+  ctx.fillStyle = '#ffffff';
+  ctx.fill(cachedLogoPath);
   ctx.restore();
 
   if (!reduceLandingMotion) landingFrameId = requestAnimationFrame(draw);
