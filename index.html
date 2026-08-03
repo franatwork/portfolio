@@ -127,10 +127,18 @@
      the sheet from underneath rather than floating on top of it. */
   .bottom-glow span {
     position: absolute;
-    bottom: -30%;
-    width: clamp(620px, 82vw, 1400px);
-    height: clamp(300px, 46vh, 600px);
+    bottom: -38%;
+    /* Oversized past the container for the same reason as .top-glow: an
+       ellipse whose edge falls inside the visible area reads as a circle
+       regardless of how gently its alpha ramps down. */
+    /* Wide enough that the left/right edges sit off-screen, but not so tall
+       that more of the bloom lands in the opaque part of the mask than before
+       — that was washing out the contact form. The bottom edge is hidden by
+       the -38% offset, the top by the mask's fade. */
+    width: clamp(760px, 130vw, 1800px);
+    height: clamp(360px, 54vh, 720px);
     border-radius: 50%;
+    filter: blur(26px);
     /* colours add like light where they overlap, so the seams between blooms
        read as new hues rather than muddy stacked alpha */
     mix-blend-mode: screen;
@@ -154,27 +162,69 @@
   }
   .bottom-glow span:nth-child(1) {
     left: -25%; --dur: 13s; --delay:  -2s; --dx:  11vw; --dy:  -7vh; --s1: 1.18; --s2: 0.90;
-    background: radial-gradient(ellipse at 50% 62%, rgba(150,42,112,0.42)  0%, rgba(150,42,112,0)  70%);
+    background: radial-gradient(ellipse at 50% 62%,
+      rgba(150,42,112,0.42) 0%,
+      rgba(150,42,112,0.344) 20%,
+      rgba(150,42,112,0.235) 38%,
+      rgba(150,42,112,0.139) 55%,
+      rgba(150,42,112,0.067) 70%,
+      rgba(150,42,112,0.021) 84%,
+      rgba(150,42,112,0) 100%);
   }
   .bottom-glow span:nth-child(2) {
     left: -5%;  --dur: 17s; --delay:  -7s; --dx: -10vw; --dy:  -9vh; --s1: 1.22; --s2: 0.88;
-    background: radial-gradient(ellipse at 50% 62%, rgba(168,55,160,0.40) 0%, rgba(168,55,160,0) 70%);
+    background: radial-gradient(ellipse at 50% 62%,
+      rgba(168,55,160,0.4) 0%,
+      rgba(168,55,160,0.328) 20%,
+      rgba(168,55,160,0.224) 38%,
+      rgba(168,55,160,0.132) 55%,
+      rgba(168,55,160,0.064) 70%,
+      rgba(168,55,160,0.02) 84%,
+      rgba(168,55,160,0) 100%);
   }
   .bottom-glow span:nth-child(3) {
     left: 18%;  --dur: 15s; --delay: -11s; --dx:  13vw; --dy:  -6vh; --s1: 1.15; --s2: 0.93;
-    background: radial-gradient(ellipse at 50% 62%, rgba(140,68,205,0.34)  0%, rgba(140,68,205,0)  70%);
+    background: radial-gradient(ellipse at 50% 62%,
+      rgba(140,68,205,0.34) 0%,
+      rgba(140,68,205,0.279) 20%,
+      rgba(140,68,205,0.19) 38%,
+      rgba(140,68,205,0.112) 55%,
+      rgba(140,68,205,0.054) 70%,
+      rgba(140,68,205,0.017) 84%,
+      rgba(140,68,205,0) 100%);
   }
   .bottom-glow span:nth-child(4) {
     left: 40%;  --dur: 19s; --delay:  -4s; --dx: -12vw; --dy:  -8vh; --s1: 1.20; --s2: 0.89;
-    background: radial-gradient(ellipse at 50% 62%, rgba(105,78,232,0.38) 0%, rgba(105,78,232,0) 70%);
+    background: radial-gradient(ellipse at 50% 62%,
+      rgba(105,78,232,0.38) 0%,
+      rgba(105,78,232,0.312) 20%,
+      rgba(105,78,232,0.213) 38%,
+      rgba(105,78,232,0.125) 55%,
+      rgba(105,78,232,0.061) 70%,
+      rgba(105,78,232,0.019) 84%,
+      rgba(105,78,232,0) 100%);
   }
   .bottom-glow span:nth-child(5) {
     left: 62%;  --dur: 14s; --delay: -13s; --dx:  10vw; --dy: -10vh; --s1: 1.17; --s2: 0.91;
-    background: radial-gradient(ellipse at 50% 62%, rgba(66,98,246,0.38)  0%, rgba(66,98,246,0)  70%);
+    background: radial-gradient(ellipse at 50% 62%,
+      rgba(66,98,246,0.38) 0%,
+      rgba(66,98,246,0.312) 20%,
+      rgba(66,98,246,0.213) 38%,
+      rgba(66,98,246,0.125) 55%,
+      rgba(66,98,246,0.061) 70%,
+      rgba(66,98,246,0.019) 84%,
+      rgba(66,98,246,0) 100%);
   }
   .bottom-glow span:nth-child(6) {
     left: 82%;  --dur: 16s; --delay:  -9s; --dx: -11vw; --dy:  -6vh; --s1: 1.19; --s2: 0.90;
-    background: radial-gradient(ellipse at 50% 62%, rgba(42,118,255,0.32)  0%, rgba(42,118,255,0)  70%);
+    background: radial-gradient(ellipse at 50% 62%,
+      rgba(42,118,255,0.32) 0%,
+      rgba(42,118,255,0.262) 20%,
+      rgba(42,118,255,0.179) 38%,
+      rgba(42,118,255,0.106) 55%,
+      rgba(42,118,255,0.051) 70%,
+      rgba(42,118,255,0.016) 84%,
+      rgba(42,118,255,0) 100%);
   }
   @media (prefers-reduced-motion: reduce) {
     .section-chevron svg { animation: none; }
@@ -218,10 +268,16 @@
   }
   .top-glow span {
     position: absolute;
-    top: -30%;
-    width: clamp(420px, 88vw, 900px);
-    height: clamp(240px, 40vh, 460px);
+    top: -38%;
+    /* Deliberately larger than the container. At the old size the ellipses
+       were smaller than the area they sat in, so their outer edge landed on
+       screen and read as a visible circle no matter how soft the ramp was.
+       Oversizing pushes every edge outside the mask; the blur then removes
+       the residual Mach banding where two blooms cross. */
+    width: clamp(560px, 155vw, 1250px);
+    height: clamp(420px, 78vh, 820px);
     border-radius: 50%;
+    filter: blur(26px);
     mix-blend-mode: screen;
     will-change: transform, opacity;
     animation:
@@ -237,27 +293,69 @@
   }
   .top-glow span:nth-child(1) {
     left: -28%; --dur: 13s; --delay:  -2s; --dx:  11vw; --dy:  6vh; --s1: 1.18; --s2: 0.90;
-    background: radial-gradient(ellipse at 50% 38%, rgba(150,42,112,0.46) 0%, rgba(150,42,112,0) 70%);
+    background: radial-gradient(ellipse at 50% 38%,
+      rgba(150,42,112,0.46) 0%,
+      rgba(150,42,112,0.377) 20%,
+      rgba(150,42,112,0.258) 38%,
+      rgba(150,42,112,0.152) 55%,
+      rgba(150,42,112,0.074) 70%,
+      rgba(150,42,112,0.023) 84%,
+      rgba(150,42,112,0) 100%);
   }
   .top-glow span:nth-child(2) {
     left: -8%;  --dur: 17s; --delay:  -7s; --dx: -10vw; --dy:  8vh; --s1: 1.22; --s2: 0.88;
-    background: radial-gradient(ellipse at 50% 38%, rgba(168,55,160,0.44) 0%, rgba(168,55,160,0) 70%);
+    background: radial-gradient(ellipse at 50% 38%,
+      rgba(168,55,160,0.44) 0%,
+      rgba(168,55,160,0.361) 20%,
+      rgba(168,55,160,0.246) 38%,
+      rgba(168,55,160,0.145) 55%,
+      rgba(168,55,160,0.07) 70%,
+      rgba(168,55,160,0.022) 84%,
+      rgba(168,55,160,0) 100%);
   }
   .top-glow span:nth-child(3) {
     left: 14%;  --dur: 15s; --delay: -11s; --dx:  13vw; --dy:  5vh; --s1: 1.15; --s2: 0.93;
-    background: radial-gradient(ellipse at 50% 38%, rgba(140,68,205,0.38) 0%, rgba(140,68,205,0) 70%);
+    background: radial-gradient(ellipse at 50% 38%,
+      rgba(140,68,205,0.38) 0%,
+      rgba(140,68,205,0.312) 20%,
+      rgba(140,68,205,0.213) 38%,
+      rgba(140,68,205,0.125) 55%,
+      rgba(140,68,205,0.061) 70%,
+      rgba(140,68,205,0.019) 84%,
+      rgba(140,68,205,0) 100%);
   }
   .top-glow span:nth-child(4) {
     left: 38%;  --dur: 19s; --delay:  -4s; --dx: -12vw; --dy:  7vh; --s1: 1.20; --s2: 0.89;
-    background: radial-gradient(ellipse at 50% 38%, rgba(105,78,232,0.42) 0%, rgba(105,78,232,0) 70%);
+    background: radial-gradient(ellipse at 50% 38%,
+      rgba(105,78,232,0.42) 0%,
+      rgba(105,78,232,0.344) 20%,
+      rgba(105,78,232,0.235) 38%,
+      rgba(105,78,232,0.139) 55%,
+      rgba(105,78,232,0.067) 70%,
+      rgba(105,78,232,0.021) 84%,
+      rgba(105,78,232,0) 100%);
   }
   .top-glow span:nth-child(5) {
     left: 60%;  --dur: 14s; --delay: -13s; --dx:  10vw; --dy:  9vh; --s1: 1.17; --s2: 0.91;
-    background: radial-gradient(ellipse at 50% 38%, rgba(66,98,246,0.42)  0%, rgba(66,98,246,0)  70%);
+    background: radial-gradient(ellipse at 50% 38%,
+      rgba(66,98,246,0.42) 0%,
+      rgba(66,98,246,0.344) 20%,
+      rgba(66,98,246,0.235) 38%,
+      rgba(66,98,246,0.139) 55%,
+      rgba(66,98,246,0.067) 70%,
+      rgba(66,98,246,0.021) 84%,
+      rgba(66,98,246,0) 100%);
   }
   .top-glow span:nth-child(6) {
     left: 80%;  --dur: 16s; --delay:  -9s; --dx: -11vw; --dy:  6vh; --s1: 1.19; --s2: 0.90;
-    background: radial-gradient(ellipse at 50% 38%, rgba(42,118,255,0.36) 0%, rgba(42,118,255,0) 70%);
+    background: radial-gradient(ellipse at 50% 38%,
+      rgba(42,118,255,0.36) 0%,
+      rgba(42,118,255,0.295) 20%,
+      rgba(42,118,255,0.202) 38%,
+      rgba(42,118,255,0.119) 55%,
+      rgba(42,118,255,0.058) 70%,
+      rgba(42,118,255,0.018) 84%,
+      rgba(42,118,255,0) 100%);
   }
 
   /* ── Nav (hidden on landing, shown from about onward) ── */
@@ -434,7 +532,10 @@
   .back-to-top {
     position: absolute;
     left: 50%;
-    bottom: 28px;
+    /* env() keeps this clear of the browser's own bottom chrome on mobile,
+       where a toolbar that appears on scroll would otherwise sit on top of it.
+       The 0px fallback means desktop is unaffected. */
+    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
     translate: -50% 0;
     display: inline-flex;
     align-items: center;
@@ -468,7 +569,9 @@
     width: 44px; height: 44px;
     border-radius: 999px;
     color: rgba(255,255,255,0.35);
-    z-index: 3;
+    /* Above .bento-overlay (z-index 4), which is inset:0 across its whole
+       section and would otherwise paint its vignette over the chevron. */
+    z-index: 6;
     transition: color 0.2s, background 0.2s;
   }
   .section-chevron:active {
@@ -482,6 +585,11 @@
   }
   @media (max-width: 900px) {
     .section-chevron { display: inline-flex; }
+    /* Clear of the browser's bottom toolbar, same reasoning as .back-to-top. */
+    .section-chevron { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
+    /* The last section needs real room under it, or the final content sits
+       flush against the browser chrome when the toolbar animates back in. */
+    #contact { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
   }
   /* A slow nudge rather than a bounce — enough to read as "there's more below"
      without competing with the content above it. */
@@ -1400,15 +1508,6 @@
   @media (max-width: 900px) {
     html { scroll-snap-type: y proximity; }
     nav { padding: 16px 18px; }
-    /* Body copy scrolls under the nav and the bar itself is transparent, so
-       text showed through the gaps between the pills. Scoped to .visible so
-       nothing paints over the landing, where the nav is still hidden. */
-    nav.visible {
-      background: rgba(10,10,10,0.66);
-      backdrop-filter: blur(14px) saturate(130%);
-      -webkit-backdrop-filter: blur(14px) saturate(130%);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
     .nav-page-title { display: none; }
     .logo-circle { width: 40px; height: 40px; }
     .nav-links { gap: 5px; }
@@ -1432,7 +1531,7 @@
          real visual mass in the upper third and the lower half is empty.
          Extra top padding drops the group just under true centre to
          counterweight it. */
-      padding: clamp(140px, 22vh, 200px) 6% clamp(88px, 14vh, 120px);
+      padding: clamp(140px, 22vh, 200px) 9% clamp(88px, 14vh, 120px);
       text-align: center;
     }
     .hero-mark { display: block; }
@@ -1451,7 +1550,17 @@
     .about-image { width: min(100%, 340px); flex-basis: auto; align-self: center; }
     .about-logo-badge { right: -12px; width: 116px; height: 116px; }
     .about-flag { left: -10px; }
-    #work, #project-lead { padding-top: 96px !important; padding-bottom: 48px !important; }
+    /* Bottom padding reserves room for the chevron, which occupies the lowest
+       62px of its section (44px tall at an 18px offset). At the old 48px the
+       work cards ran underneath it. */
+    #work, #project-lead {
+      padding-top: 96px !important;
+      padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+    /* #about needs more than the others: .about-logo-badge is absolutely
+       positioned at bottom:-30px, so it hangs below the photo's own box and
+       padding alone under-counts by that much. */
+    #about { padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)) !important; }
     .work-grid { grid-template-columns: 1fr; max-height: none; overflow: visible; }
     .work-col-left { display: grid; grid-template-columns: 1fr 1fr; }
     .work-card { min-height: 250px; }
@@ -1468,7 +1577,9 @@
   }
 
   @media (max-width: 640px) {
-    .hero-title { font-size: clamp(46px, 15vw, 72px); }
+    /* 15vw put "Portfolio" within a few px of the edges at 375px — nine wide
+       characters in Archivo Black is the constraint here, not the box. */
+    .hero-title { font-size: clamp(38px, 12vw, 64px); }
     .work-col-left { grid-template-columns: 1fr; }
     .work-card, .work-card-tall { min-height: 270px; }
     .contact-form-grid { grid-template-columns: 1fr; }
