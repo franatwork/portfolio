@@ -113,12 +113,12 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(95deg,
-      rgba(66,133,244,0.30)  0%,
-      rgba(155,114,203,0.28) 21%,
-      rgba(56,201,214,0.22)  39%,
-      rgba(217,101,112,0.26) 58%,
-      rgba(232,93,158,0.26)  77%,
-      rgba(246,179,60,0.22) 100%);
+      rgba(150,42,112,0.30)  0%,
+      rgba(168,55,160,0.28) 21%,
+      rgba(140,68,205,0.22)  39%,
+      rgba(105,78,232,0.26) 58%,
+      rgba(66,98,246,0.26)   77%,
+      rgba(42,118,255,0.22) 100%);
   }
   /* Blooms are wide, soft ellipses that sit mostly below the fold — only their
      diffuse upper halo shows, so no individual shape is readable. They light
@@ -152,27 +152,27 @@
   }
   .bottom-glow span:nth-child(1) {
     left: -25%; --dur: 13s; --delay:  -2s; --dx:  11vw; --dy:  -7vh; --s1: 1.18; --s2: 0.90;
-    background: radial-gradient(ellipse at 50% 62%, rgba(66,133,244,0.42)  0%, rgba(66,133,244,0)  70%);
+    background: radial-gradient(ellipse at 50% 62%, rgba(150,42,112,0.42)  0%, rgba(150,42,112,0)  70%);
   }
   .bottom-glow span:nth-child(2) {
     left: -5%;  --dur: 17s; --delay:  -7s; --dx: -10vw; --dy:  -9vh; --s1: 1.22; --s2: 0.88;
-    background: radial-gradient(ellipse at 50% 62%, rgba(155,114,203,0.40) 0%, rgba(155,114,203,0) 70%);
+    background: radial-gradient(ellipse at 50% 62%, rgba(168,55,160,0.40) 0%, rgba(168,55,160,0) 70%);
   }
   .bottom-glow span:nth-child(3) {
     left: 18%;  --dur: 15s; --delay: -11s; --dx:  13vw; --dy:  -6vh; --s1: 1.15; --s2: 0.93;
-    background: radial-gradient(ellipse at 50% 62%, rgba(56,201,214,0.34)  0%, rgba(56,201,214,0)  70%);
+    background: radial-gradient(ellipse at 50% 62%, rgba(140,68,205,0.34)  0%, rgba(140,68,205,0)  70%);
   }
   .bottom-glow span:nth-child(4) {
     left: 40%;  --dur: 19s; --delay:  -4s; --dx: -12vw; --dy:  -8vh; --s1: 1.20; --s2: 0.89;
-    background: radial-gradient(ellipse at 50% 62%, rgba(217,101,112,0.38) 0%, rgba(217,101,112,0) 70%);
+    background: radial-gradient(ellipse at 50% 62%, rgba(105,78,232,0.38) 0%, rgba(105,78,232,0) 70%);
   }
   .bottom-glow span:nth-child(5) {
     left: 62%;  --dur: 14s; --delay: -13s; --dx:  10vw; --dy: -10vh; --s1: 1.17; --s2: 0.91;
-    background: radial-gradient(ellipse at 50% 62%, rgba(232,93,158,0.38)  0%, rgba(232,93,158,0)  70%);
+    background: radial-gradient(ellipse at 50% 62%, rgba(66,98,246,0.38)  0%, rgba(66,98,246,0)  70%);
   }
   .bottom-glow span:nth-child(6) {
     left: 82%;  --dur: 16s; --delay:  -9s; --dx: -11vw; --dy:  -6vh; --s1: 1.19; --s2: 0.90;
-    background: radial-gradient(ellipse at 50% 62%, rgba(246,179,60,0.32)  0%, rgba(246,179,60,0)  70%);
+    background: radial-gradient(ellipse at 50% 62%, rgba(42,118,255,0.32)  0%, rgba(42,118,255,0)  70%);
   }
   @media (prefers-reduced-motion: reduce) {
     .bottom-glow span { animation: none; }
@@ -2416,7 +2416,8 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         (status === 'ok' ? 'Thanks! Your message was sent.' : 'Sorry, something went wrong. Please try again.'),
       status !== 'ok'
     );
-    window.location.hash = '#contact';
+    const contactSection = document.getElementById('contact');
+    if (contactSection) contactSection.scrollIntoView();
   }
 
   if (attachment) {
@@ -2434,12 +2435,27 @@ if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     showContactNotice('Thanks! Your message was sent.', false);
     setSubmitting(false);
     if (form) form.reset();
-    history.replaceState(null, '', `${window.location.pathname}#contact`);
+    history.replaceState(null, '', window.location.pathname);
   });
 
   document.addEventListener('basin:submit:error', function() {
     showContactNotice('Sorry, something went wrong. Please try again.', true);
     setSubmitting(false);
+  });
+})();
+
+// Scroll to in-page targets without leaving the #hash in the address bar.
+// Bare scrollIntoView() (no options) honours the CSS scroll-behavior, so it
+// stays smooth normally and jumps under prefers-reduced-motion.
+(function () {
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.getElementById(a.getAttribute('href').slice(1));
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView();
+      history.replaceState(null, '', location.pathname + location.search);
+    });
   });
 })();
 </script>

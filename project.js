@@ -62,4 +62,17 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && lb.classList.contains('open')) close();
   });
+
+  // Scroll to in-page targets without leaving the #hash in the address bar.
+  // Bare scrollIntoView() (no options) honours the CSS scroll-behavior, so it
+  // stays smooth normally and jumps under prefers-reduced-motion.
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.getElementById(a.getAttribute('href').slice(1));
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView();
+      history.replaceState(null, '', location.pathname + location.search);
+    });
+  });
 })();
