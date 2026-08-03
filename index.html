@@ -1880,19 +1880,86 @@ let palette = palettes.default;
 
 // ── Ripple trail system ──
 const ripples = [];
-let lastMX = -9999, lastMY = -9999;
+let lastMX = -9999, lastMY = -9999, lastMoveT = 0;
+// Distance carried over between events, so ripples land at even spacing along
+// the path rather than once per event — event frequency is not under our
+// control and varies with framerate and load.
+let pathAccum = 0;
+// Smoothed pointer velocity in px/s. Smoothed because a single sample is
+// noisy: the browser coalesces moves unevenly, so raw per-event velocity
+// spikes and dips through motion the hand experiences as constant.
+let smoothedSpeed = 0;
+
+const RIPPLE_SPACING = 22;   // px between ripples along the path
+const RIPPLE_MAX = 20;
+const SPEED_REF = 1500;      // px/s that counts as a brisk flick
+const SPEED_EMA = 0.25;      // higher = more responsive, more jittery
+const IDLE_GAP_MS = 120;     // longer than this and the gesture has restarted
+
+function spawnRipple(x, y, speed01) {
+  ripples.push({ x, y, born: performance.now(), strength: speed01 });
+  if (ripples.length > RIPPLE_MAX) ripples.shift();
+}
 
 landingSurface.addEventListener('pointermove', e => {
   if (reduceLandingMotion || e.pointerType === 'touch') return;
   const rect = landingSurface.getBoundingClientRect();
-  const mx = e.clientX - rect.left;
-  const my = e.clientY - rect.top;
-  const dx = mx - lastMX, dy = my - lastMY;
-  const speed = Math.sqrt(dx * dx + dy * dy);
-  if (speed > 12 || lastMX === -9999) {
-    ripples.push({ x: mx, y: my, born: performance.now(), speed: Math.min(speed, 60) });
-    lastMX = mx; lastMY = my;
-    if (ripples.length > 16) ripples.shift();
+  // Coalesced events are the intermediate positions the browser merged into
+  // this one. Using them is what makes a fast flick leave a continuous trail
+  // instead of a few isolated blobs wherever the events happened to land.
+  let points = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+  // The list is empty for untrusted events and in some browser edge cases;
+  // without this fall-back the handler would silently stop spawning anything.
+  if (!points.length) points = [e];
+
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i];
+    const mx = p.clientX - rect.left;
+    const my = p.clientY - rect.top;
+    const now = p.timeStamp;
+
+    if (lastMX === -9999) {
+      lastMX = mx; lastMY = my; lastMoveT = now;
+      continue;
+    }
+
+    const dx = mx - lastMX;
+    const dy = my - lastMY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const dt = now - lastMoveT;
+
+    // A pause means the next movement is a new gesture, not a continuation —
+    // without this, resuming slowly would inherit the old velocity for a frame.
+    if (dt > IDLE_GAP_MS) {
+      smoothedSpeed = 0;
+      pathAccum = 0;
+      lastMX = mx; lastMY = my; lastMoveT = now;
+      continue;
+    }
+
+    if (dt > 0) {
+      const instant = (dist / dt) * 1000;
+      smoothedSpeed += (instant - smoothedSpeed) * SPEED_EMA;
+    }
+
+    pathAccum += dist;
+    if (pathAccum >= RIPPLE_SPACING && dist > 0) {
+      // Cap the per-event burst so a huge jump (tab refocus, pointer warp)
+      // cannot dump dozens of ripples at once.
+      const n = Math.min(4, Math.floor(pathAccum / RIPPLE_SPACING));
+      const strength = Math.min(1, smoothedSpeed / SPEED_REF);
+      for (let k = 1; k <= n; k++) {
+        const f = k / n;
+        spawnRipple(lastMX + dx * f, lastMY + dy * f, strength);
+      }
+      // Carry the remainder rather than zeroing it. Zeroing quantises spacing
+      // to whole event steps — a 20px-per-event drag spawned one ripple every
+      // 40px instead of every 22 — so the trail's density tracked event rate
+      // rather than distance, which is the jitter this rewrite exists to fix.
+      pathAccum -= n * RIPPLE_SPACING;
+    }
+
+    lastMX = mx; lastMY = my; lastMoveT = now;
   }
 }, { passive: true });
 
@@ -2044,7 +2111,10 @@ function wave(cx, cy, time, nowMs) {
     const rdy = cy - rip.y;
     const dotDist = Math.sqrt(rdx * rdx + rdy * rdy);
     const lifeFade = Math.max(0, 1 - age / (lifeMs / 1000));
-    const intensity = (rip.speed / 60) * 0.7 + 0.3;
+    // strength is normalised pointer velocity (0..1), not raw distance as
+    // before — so a slow drag and a fast flick over the same span now read
+    // differently, which is the point.
+    const intensity = rip.strength * 0.7 + 0.3;
     let rippleSum = 0;
     for (let ring = 0; ring < 3; ring++) {
       const ringDelay = ring * 0.18;
