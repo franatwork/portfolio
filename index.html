@@ -1537,8 +1537,11 @@
     }
     .hero-mark { display: block; }
     /* The canvas exists for a pointer ripple that never fires on touch, so on
-       mobile it is pure cost — the top wash replaces it. */
-    #landing #bg { display: none; }
+       mobile it is pure cost — the top wash replaces it. #spill is the same
+       halftone continuing down into #about to hide the seam between the two;
+       with the landing canvas gone it has nothing to continue from and reads
+       as a stray band of dots over the heading. */
+    #landing #bg, #spill { display: none; }
     /* The chevron at the bottom of the section is the scroll cue now, so the
        Enter pill would be a second control saying the same thing. */
     .hero-cta { display: none; }
@@ -2287,8 +2290,14 @@ function draw(timestamp) {
   if (!reduceLandingMotion) landingFrameId = requestAnimationFrame(draw);
 }
 
+// Both canvases this loop draws into are display:none below 900px — the
+// landing's halftone because its ripple is pointer-only, and the about
+// spillover because it has nothing left to continue from. Without this the
+// loop kept running and painting into hidden canvases every frame.
+const landingCanvasHidden = window.matchMedia('(max-width: 900px)');
+
 function syncLandingAnimation() {
-  const shouldRun = landingIsVisible && !document.hidden;
+  const shouldRun = landingIsVisible && !document.hidden && !landingCanvasHidden.matches;
   if (shouldRun && !landingFrameId) {
     lastLandingFrame = 0;
     landingFrameId = requestAnimationFrame(draw);
@@ -2311,6 +2320,12 @@ const landingMotionObserver = new IntersectionObserver((entries) => {
   syncLandingAnimation();
 }, { threshold: 0.01 });
 landingMotionObserver.observe(landingSurface);
+// Crossing the breakpoint (rotation, or a resized desktop window) has to
+// start or stop the loop, or it stays wrong until the next scroll.
+landingCanvasHidden.addEventListener('change', () => {
+  if (!landingCanvasHidden.matches) { resize(); updateLogoRect(); resizeLogoCanvas(); cachedLogoPath = null; }
+  syncLandingAnimation();
+});
 if (spillCanvas) landingMotionObserver.observe(spillCanvas);
 document.addEventListener('visibilitychange', syncLandingAnimation);
 syncLandingAnimation();
