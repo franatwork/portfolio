@@ -1897,8 +1897,13 @@ let smoothedSpeed = 0;
 // Widening the spacing as speed rises keeps the spawn rate low enough that
 // each ripple survives long enough to actually grow.
 const RIPPLE_SPACING_MIN = 22;
-const RIPPLE_SPACING_MAX = 180;
-const RIPPLE_MAX = 24;
+// 180 kept ripples alive but left a fast flick too sparse to read as a trail.
+// The real constraint was never spacing, it was the pool: at 24 slots a fast
+// sweep evicted its own ripples within ~150ms. A full pool measured 2.2ms of
+// a 33ms frame, so the budget was there all along — spend it on slots and the
+// spacing can stay tight enough to look continuous.
+const RIPPLE_SPACING_MAX = 85;
+const RIPPLE_MAX = 72;
 const SPEED_REF = 1500;      // px/s that counts as a brisk flick
 const SPEED_EMA = 0.25;      // higher = more responsive, more jittery
 const IDLE_GAP_MS = 120;     // longer than this and the gesture has restarted
