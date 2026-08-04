@@ -1890,8 +1890,15 @@ let pathAccum = 0;
 // spikes and dips through motion the hand experiences as constant.
 let smoothedSpeed = 0;
 
-const RIPPLE_SPACING = 22;   // px between ripples along the path
-const RIPPLE_MAX = 20;
+// Spacing scales with speed. At a fixed 22px a fast sweep spawned ~128
+// ripples/second into the pool below, so the FIFO evicted each one about
+// 150ms in — against the 2200ms it needs to expand fully. Fast movement
+// produced tiny ripples and slow movement large ones, precisely backwards.
+// Widening the spacing as speed rises keeps the spawn rate low enough that
+// each ripple survives long enough to actually grow.
+const RIPPLE_SPACING_MIN = 22;
+const RIPPLE_SPACING_MAX = 180;
+const RIPPLE_MAX = 24;
 const SPEED_REF = 1500;      // px/s that counts as a brisk flick
 const SPEED_EMA = 0.25;      // higher = more responsive, more jittery
 const IDLE_GAP_MS = 120;     // longer than this and the gesture has restarted
@@ -1942,12 +1949,19 @@ landingSurface.addEventListener('pointermove', e => {
       smoothedSpeed += (instant - smoothedSpeed) * SPEED_EMA;
     }
 
+    const strength = Math.min(1, smoothedSpeed / SPEED_REF);
+    // Quadratic, not linear. Linear widened the gaps too early — a gentle
+    // 300px/s drag already sat at 55px spacing and lost the fine trail that
+    // slow movement is supposed to leave. Squaring keeps the low end near the
+    // minimum and saves the widening for speeds that actually need it.
+    const spacing = RIPPLE_SPACING_MIN +
+      (RIPPLE_SPACING_MAX - RIPPLE_SPACING_MIN) * strength * strength;
+
     pathAccum += dist;
-    if (pathAccum >= RIPPLE_SPACING && dist > 0) {
+    if (pathAccum >= spacing && dist > 0) {
       // Cap the per-event burst so a huge jump (tab refocus, pointer warp)
       // cannot dump dozens of ripples at once.
-      const n = Math.min(4, Math.floor(pathAccum / RIPPLE_SPACING));
-      const strength = Math.min(1, smoothedSpeed / SPEED_REF);
+      const n = Math.min(4, Math.floor(pathAccum / spacing));
       for (let k = 1; k <= n; k++) {
         const f = k / n;
         spawnRipple(lastMX + dx * f, lastMY + dy * f, strength);
@@ -1956,7 +1970,7 @@ landingSurface.addEventListener('pointermove', e => {
       // to whole event steps — a 20px-per-event drag spawned one ripple every
       // 40px instead of every 22 — so the trail's density tracked event rate
       // rather than distance, which is the jitter this rewrite exists to fix.
-      pathAccum -= n * RIPPLE_SPACING;
+      pathAccum -= n * spacing;
     }
 
     lastMX = mx; lastMY = my; lastMoveT = now;
@@ -2103,7 +2117,6 @@ function wave(cx, cy, time, nowMs) {
   let depth = Math.max(0, Math.min(1, combined + pulse));
   let alphaBoost = 0;
   const lifeMs = 2200;
-  const expandSpeed = 260;
   for (const rip of ripples) {
     const age = (nowMs - rip.born) / 1000;
     if (age > lifeMs / 1000) continue;
@@ -2115,6 +2128,10 @@ function wave(cx, cy, time, nowMs) {
     // before — so a slow drag and a fast flick over the same span now read
     // differently, which is the point.
     const intensity = rip.strength * 0.7 + 0.3;
+    // Per-ripple rather than a shared constant: a fast flick's front travels
+    // outward quicker, so it covers ground while it is still young. Reinforces
+    // the wider spacing above — fast gestures give fewer, larger ripples.
+    const expandSpeed = 260 + rip.strength * 240;
     let rippleSum = 0;
     for (let ring = 0; ring < 3; ring++) {
       const ringDelay = ring * 0.18;
